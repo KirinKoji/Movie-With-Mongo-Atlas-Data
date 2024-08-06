@@ -17,13 +17,13 @@ import { ListMovieQuery } from './dto/list.dto';
       private movieModel: Model<MovieDocument>,
       ) {}
   
-      async create(createMovieDto: CreateMovieDto): Promise<Movie> {
+     async create(createMovieDto: CreateMovieDto): Promise<Movie> {
         const movieDocument = await this.movieModel.create(createMovieDto);
     
         return movieDocument;
       }
   
-      findAll(listMovieQuery: ListMovieQuery): Promise<Movie[]> { 
+      getListMovies(listMovieQuery: ListMovieQuery): Promise<Movie[]> { 
       const conditions: FilterQuery<Movie> = {};
   
       const plot = listMovieQuery.plot;
@@ -43,7 +43,7 @@ import { ListMovieQuery } from './dto/list.dto';
       const type = listMovieQuery.type
       const num_mflix_comments = listMovieQuery.num_mflix_comments;
   
-      const limit = listMovieQuery.limit || 10;
+      const limit = listMovieQuery.limit || 20;
       const offset = listMovieQuery.offset || 0;
       
   
@@ -158,19 +158,42 @@ import { ListMovieQuery } from './dto/list.dto';
       
     }
   
-    async findById(id: string): Promise<Movie> {
+    async getDetailMovie(id: string): Promise<Movie> {
       const isvalidId = mongoose.isValidObjectId(id);
       
       if (!isvalidId) {
-        throw new BadRequestException('Please enter a correct');
+        throw BaseError.BadRequest(ErrorMovie.InValidId);
       }
       
       const movies = await this.movieModel.findById(id);
       
       if (!movies) {
-        throw new NotFoundException('The Object was not founds!');
+        throw BaseError.NotFound(ErrorMovie.MovieNotFound);
       }
   
       return movies;
     }
+
+    async updateMovie(id: string, movie: UpdateMovieDto): Promise<Movie> {
+        const updateMovie = await this.movieModel.findByIdAndUpdate(id, movie, {
+          new: true,
+          runValidators: true,
+        });
+
+        if (!updateMovie) {
+          throw BaseError.NotFound(ErrorMovie.MovieNotFound);
+        }
+
+         return updateMovie;
+      }
+    
+      async deteleMovie(id: string): Promise<Movie> {
+        const movie = await this.movieModel.findByIdAndDelete(id);
+
+        if (!movie) {
+          throw BaseError.NotFound(ErrorMovie.MovieNotFound);
+        }
+        
+        return movie;
+      }
   }
