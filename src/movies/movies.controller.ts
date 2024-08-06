@@ -18,20 +18,33 @@ import { Movie } from './entities/movies.schema';
   export class MovieController {
     constructor(private readonly movieService: MovieService) {}
   
-    @Post()
+   @Post()
     async create(@Body() createMovieDto: CreateMovieDto) {
       return this.movieService.create(createMovieDto);
     }
   
     @Get()
     findAll(@Query() listMovieQuery: ListMovieQuery) {
-  
-      return this.movieService.findAll(listMovieQuery);
+      return this.movieService.getListMovies(listMovieQuery);
     }
   
     @Get(':id')
     async findOne(@Param('id') id: string): Promise<Movie> {
-      return this.movieService.findById(id);
+      return this.movieService.getDetailMovie(id);
+    }
+
+    @Patch(':id')
+    async update(
+        @Param('id') id: string,
+        @Body() updateMovieDto: UpdateMovieDto,
+      ): Promise<Movie> {
+        return await this.movieService.updateMovie(id, updateMovieDto);
+    }
+    
+    @Delete(':id')
+    async deleteTheater(@Param('id') id: string): Promise<Movie> {
+        return await this.movieService.deteleMovie(id);
+  
     }
 }
 
